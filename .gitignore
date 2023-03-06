@@ -3,5 +3,5 @@ build
 .idea
 dist
 *.csv
-input.*
+*.xlsx
 output.*

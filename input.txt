@@ -1,0 +1,5 @@
+"Via Livorno 60, Torino (TO)"	"Corso Umberto I, 29, 28838 Stresa VB"
+Environment Park Torino	Hotel Regina Palace Stresa
+"Via Livorno 60, Torino (TO)"	"Via Lincoln, 2, 90133 Palermo PA"
+Environment Park Torino	Orto botanico Palermo
+Torino	Palermo
