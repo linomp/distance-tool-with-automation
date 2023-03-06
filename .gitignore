@@ -2,3 +2,6 @@ venv
 build
 .idea
 dist
+*.csv
+input.*
+output.*
