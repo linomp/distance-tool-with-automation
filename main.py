@@ -3,67 +3,94 @@ import time
 
 from playwright.sync_api import sync_playwright
 
-INPUT_FILE = "input.txt"
-INPUT_DELIMITER = "\t"
-OUTPUT_FILE = "output.csv"
-OUTPUT_DELIMITER = ","
-GOOGLE_MAPS_START_URL = "https://www.google.com/maps/dir///@41.1905507,3.395374,5z/data=!4m2!4m1!3e0?hl=en"
-SECONDS_TO_SLEEP_BETWEEN_SEARCHES = 1
 
-if not os.path.exists(OUTPUT_FILE):
-    with open(OUTPUT_FILE, "w") as f:
-        f.write(f"source{OUTPUT_DELIMITER}destination{OUTPUT_DELIMITER}driving_distance_km"+"\n")
+def parse_line(line, delimiter):
+    line = line.replace("\n", "")
+    source, destination = line.split(delimiter)
+    source = source.replace('"', '')
+    destination = destination.replace('"', '')
+    return source, destination
 
-with open(INPUT_FILE, "r") as f:
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
 
-        page.goto(GOOGLE_MAPS_START_URL)
-        page.click("form[action*='consent.google.com'] button")
+def setup_output_file(file, delimiter):
+    if not os.path.exists(file):
+        with open(file, "w") as f:
+            f.write(f"source{delimiter}destination{delimiter}driving_distance_km" + "\n")
 
-        # Read input file line by line
-        while True:
-            line = f.readline()
-            if not line:
-                break
 
-            line = line[:-1]
-            source, destination = line.split(INPUT_DELIMITER)
-            source = source.replace('"', '')
-            destination = destination.replace('"', '')
+def write_to_output_file(file, delimiter, source, destination, distance):
+    with open(file, "a") as o:
+        # Replace commas with semicolons to avoid problems with CSV
+        source = source.replace(",", ";")
+        destination = destination.replace(",", ";")
+        o.write(f"{source}{delimiter}{destination}{delimiter}{distance}\n")
 
-            print(f"Searching distance from {{{source}}} to {{{destination}}}...")
 
-            try:
-                page.wait_for_selector("div#directions-searchbox-0 input")
-                page.fill("div#directions-searchbox-0 input", source)
+def get_distances_line_by_line(input_file="input.txt",
+                               input_delimiter="\t",
+                               output_file="output.csv",
+                               output_delimiter=",",
+                               google_maps_start_url="https://www.google.com/maps/dir///@41.1905507,3.395374,5z/data=!4m2!4m1!3e0?hl=en",
+                               seconds_to_sleep_between_searches=1,
+                               headless=True):
+    setup_output_file(file=output_file, delimiter=output_delimiter)
 
-                page.wait_for_selector("div#directions-searchbox-1 input")
-                page.fill("div#directions-searchbox-1 input", destination)
+    with open(input_file, "r") as f:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=headless)
+            page = browser.new_page()
 
-                page.click("img[aria-label='Driving']")
-                page.click("div#directions-searchbox-1 input")
-                page.press("div#directions-searchbox-1 input", "Enter")
+            page.goto(google_maps_start_url)
+            page.click("form[action*='consent.google.com'] button")
 
-                page.wait_for_selector("div#section-directions-trip-0", timeout=60000)
+            # Read input file line by line
+            while True:
+                line = f.readline()
+                if not line:
+                    break
 
-                distance = page.inner_text("div#section-directions-trip-0")
-                distance = [line for line in distance.splitlines() if "km" in line][0]
-                distance = distance.replace(",", "").replace("km", "").strip()
-            except:
-                distance = "ERROR"
+                source, destination = parse_line(line=line, delimiter=input_delimiter)
 
-            print(f"Result: {distance} km")
+                print(f"Searching distance from {{{source}}} to {{{destination}}}...")
 
-            # Append result to output file
-            with open(OUTPUT_FILE, "a") as o:
-                source = source.replace(",", ";")
-                destination = destination.replace(",", ";")
-                o.write(f"{source}{OUTPUT_DELIMITER}{destination}{OUTPUT_DELIMITER}{distance}\n")
+                try:
+                    page.wait_for_selector("div#directions-searchbox-0 input")
+                    page.fill("div#directions-searchbox-0 input", source)
 
-            # sleep to not overload google maps
-            time.sleep(SECONDS_TO_SLEEP_BETWEEN_SEARCHES)
-            page.goto(GOOGLE_MAPS_START_URL)
+                    page.wait_for_selector("div#directions-searchbox-1 input")
+                    page.fill("div#directions-searchbox-1 input", destination)
 
-        browser.close()
+                    page.click("img[aria-label='Driving']")
+                    page.click("div#directions-searchbox-1 input")
+                    page.press("div#directions-searchbox-1 input", "Enter")
+
+                    page.wait_for_selector("div#section-directions-trip-0", timeout=60000)
+
+                    distance = page.inner_text("div#section-directions-trip-0")
+                    distance = [line for line in distance.splitlines() if "km" in line][0]
+                    distance = distance.replace(",", "").replace("km", "").strip()
+                except:
+                    distance = "ERROR"
+
+                print(f"Result: {distance} km")
+
+                write_to_output_file(file=output_file, delimiter=output_delimiter, source=source,
+                                     destination=destination, distance=distance)
+
+                # sleep to not overload google maps
+                time.sleep(seconds_to_sleep_between_searches)
+                page.goto(google_maps_start_url)
+
+            browser.close()
+
+
+if __name__ == "__main__":
+    get_distances_line_by_line(
+        input_file="input.txt",
+        input_delimiter="\t",
+        output_file="output.csv",
+        output_delimiter=",",
+        google_maps_start_url="https://www.google.com/maps/dir///@41.1905507,3.395374,5z/data=!4m2!4m1!3e0?hl=en",
+        seconds_to_sleep_between_searches=1,
+        headless=True
+    )
