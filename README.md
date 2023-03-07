@@ -1,5 +1,7 @@
 # distance-tool-with-automation
 
+[![CI](https://github.com/linomp/distance-tool-with-automation/actions/workflows/CI.yml/badge.svg)](https://github.com/linomp/distance-tool-with-automation/actions/workflows/CI.yml)
+
 ## Installation
 
 Pre-requisites:
