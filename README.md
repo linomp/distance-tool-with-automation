@@ -9,10 +9,11 @@ Pre-requisites:
 
 Run the following commands to clone the project, create a virtual environment and install the project dependencies:
 
-   ```commandline
+   ```shell
    git clone https://github.com/linomp/distance-tool-with-automation.git
    cd distance-tool-with-automation
    python -m venv venv
+   call venv\Scripts\activate.bat
    pip install -u pip
    pip install -r requirements.txt
    playwright install chromium
