@@ -15,7 +15,7 @@ The following commands clone the project, create a virtual environment and insta
    python -m venv venv
    pip install -u pip
    pip install -r requirements.txt
-   playwright install
+   playwright install chromium
    ```
 
 ## How to use:
