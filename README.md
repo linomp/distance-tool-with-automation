@@ -7,7 +7,7 @@ Pre-requisites:
 - Python 3.10+
 - pip 22.3+
 
-The following commands clone the project, create a virtual environment and install the project dependencies:
+Run the following commands to clone the project, create a virtual environment and install the project dependencies:
 
    ```commandline
    git clone https://github.com/linomp/distance-tool-with-automation.git
