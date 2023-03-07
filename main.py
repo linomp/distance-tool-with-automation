@@ -73,7 +73,12 @@ def start_processing_loop(input_file="data/input.txt",
             page = browser.new_page()
 
             page.goto(google_maps_start_url)
-            page.click("form[action*='consent.google.com'] button")
+            try:
+                page.wait_for_selector("form[action*='consent.google.com'] button", timeout=google_maps_query_timeout)
+                page.click("form[action*='consent.google.com'] button")
+            except:
+                if page.query_selector("div#directions-searchbox-0 input") is None:
+                    raise Exception("Google Maps did not load correctly")
 
             while True:
                 line = f.readline()
