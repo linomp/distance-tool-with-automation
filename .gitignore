@@ -5,3 +5,5 @@ dist
 *.csv
 *.xlsx
 output.*
+*_cache
+test_input.txt

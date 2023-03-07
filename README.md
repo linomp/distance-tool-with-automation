@@ -39,17 +39,21 @@ Run the following commands to clone the project, create a virtual environment an
    _Note: from Excel you can export an .xlsx as a tab-delimited .txt file_
 
 
-
 2. Invoke the tool:
     ```bash
     # Windows
-    python main.py -i input.txt -d "\t"
+    python main.py -i data/input.txt -d "\t"
     ```
 
-2. The tool will process the input file line-by-line, calculating the distance between every pair of addresses and writing the
+2. The tool will process the input file line-by-line, calculating the distance between every pair of addresses and
+   writing the
    result in the output file. The final result will look like this:
-   
+
    ![output](https://user-images.githubusercontent.com/40581019/223180449-9546dba8-ce92-4505-a840-382b33e82a0c.png)
 
 ## Alternative
-- This [other version](https://github.com/linomp/distance-tool) gets the distances directly from the Google Maps Distance Matrix API, offers a web-based UI and allows to upload an excel file.  However, it requires a Google Maps API key. The service is free up to [~40K requests per month](https://mapsplatform.google.com/pricing/) but after that Google will start to charge you.
+
+- This [other version](https://github.com/linomp/distance-tool) gets the distances directly from the Google Maps
+  Distance Matrix API, offers a web-based UI and allows to upload an excel file. However, it requires a Google Maps API
+  key. The service is free up to [~40K requests per month](https://mapsplatform.google.com/pricing/) but after that
+  Google will start to charge you.
