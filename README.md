@@ -10,6 +10,7 @@ Pre-requisites:
 Run the following commands to clone the project, create a virtual environment and install the project dependencies:
 
    ```shell
+   # Windows
    git clone https://github.com/linomp/distance-tool-with-automation.git
    cd distance-tool-with-automation
    python -m venv venv
@@ -41,6 +42,7 @@ Run the following commands to clone the project, create a virtual environment an
 
 2. Invoke the tool:
     ```bash
+    # Windows
     python main.py -i input.txt -d "\t"
     ```
 
