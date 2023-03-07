@@ -7,13 +7,16 @@ Pre-requisites:
 - Python 3.10+
 - pip 22.3+
 
-```commandline
-git clone https://github.com/linomp/distance-tool-with-automation.git
-python -m venv venv
-pip install -u pip
-pip install -r requirements.txt
-playwright install
-```
+The following commands clone the project, create a virtual environment and install the project dependencies:
+
+   ```commandline
+   git clone https://github.com/linomp/distance-tool-with-automation.git
+   cd distance-tool-with-automation
+   python -m venv venv
+   pip install -u pip
+   pip install -r requirements.txt
+   playwright install
+   ```
 
 ## How to use:
 
