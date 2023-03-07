@@ -17,9 +17,8 @@ playwright install
 
 ## How to use:
 
-1. Provide a .txt file and the delimiter used in the file. The file should contain two addresses per line (origin and
-   destination), separated by
-   the delimiter.
+1. Create an input `.txt` file containing two addresses per line (origin and
+   destination), separated by a delimiter (e.g. comma, tab, semicolon).
 
    Here is an example of tab-delimited input file (`<TAB>` added for readability, normally they are not visible in the
    file):
@@ -32,7 +31,7 @@ playwright install
     Torino<TAB>Palermo
     ```
 
-   _Note: from Excel you can export as tab-delimited .txt file_
+   _Note: from Excel you can export an .xlsx as a tab-delimited .txt file_
 
 
 
