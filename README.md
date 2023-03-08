@@ -57,8 +57,7 @@ Run the following commands to clone the project, create a virtual environment an
     ```
 
 2. The tool will process the input file line-by-line, calculating the distance between every pair of addresses and
-   writing the
-   result in the output file. The final result will look like this:
+   writing the result in a `.csv` output file. The final result will look like this:
 
    ![output](https://user-images.githubusercontent.com/40581019/223180449-9546dba8-ce92-4505-a840-382b33e82a0c.png)
 
