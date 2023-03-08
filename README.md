@@ -56,7 +56,10 @@ Run the following commands to clone the project, create a virtual environment an
     streamlit run app_ui.py
     ```
    Then visit http://localhost:8501/ to use the browser-based UI:
+   <br/>
+   <br/>
    <img src="ui_demo.png" width="80%" />
+
    <details>
       <summary>Or invoke the app from command-line (advanced)</summary>
 
@@ -68,7 +71,7 @@ Run the following commands to clone the project, create a virtual environment an
       python3 app.py -i data/input.txt -d "\t"
       ```
    </details>
-
+   <br/>
 
 3. The tool will process the input file line-by-line, calculating the distance between every pair of addresses and
    writing the result in a `.csv` output file. The final result will look like this:
