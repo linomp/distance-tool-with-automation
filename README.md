@@ -52,7 +52,7 @@ Run the following commands to clone the project, create a virtual environment an
     # Windows
     python main.py -i data/input.txt -d "\t"
     
-    # MacOs/Linux
+    # MacOS/Linux
     python3 main.py -i data/input.txt -d "\t"
     ```
 
@@ -64,7 +64,6 @@ Run the following commands to clone the project, create a virtual environment an
 
 ## Alternative
 
-- This [other version](https://github.com/linomp/distance-tool) gets the distances directly from the Google Maps
-  Distance Matrix API, offers a web-based UI and allows to upload an excel file. However, it requires a Google Maps API
-  key. The service is free up to [~40K requests per month](https://mapsplatform.google.com/pricing/) but after that
-  Google will start to charge you.
+This [other version](https://github.com/linomp/distance-tool) gets the distances using the Google Maps Distance Matrix API. 
+
+It offers a web-based UI and allows you to upload an excel file. However, it requires a Google Maps API key. The service is free up to [~40K requests per month](https://mapsplatform.google.com/pricing/) but after that Google will start charging you.
