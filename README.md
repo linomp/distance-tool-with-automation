@@ -71,7 +71,6 @@ Run the following commands to clone the project, create a virtual environment an
       python3 app.py -i data/input.txt -d "\t"
       ```
    </details>
-   <br/>
 
 3. The tool will process the input file line-by-line, calculating the distance between every pair of addresses and
    writing the result in a `.csv` output file. The final result will look like this:
