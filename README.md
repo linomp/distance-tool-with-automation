@@ -12,12 +12,18 @@ Pre-requisites:
 Run the following commands to clone the project, create a virtual environment and install the project dependencies:
 
    ```shell
-   # Windows
    git clone https://github.com/linomp/distance-tool-with-automation.git
    cd distance-tool-with-automation
+   
+   # Windows
    python -m venv venv
    call venv\Scripts\activate.bat
-   pip install -u pip
+   
+   # MacOS/Linux
+   python3 -m venv venv
+   source ./venv/bin/activate
+      
+   pip install --upgrade pip
    pip install -r requirements.txt
    playwright install chromium
    ```
@@ -45,6 +51,9 @@ Run the following commands to clone the project, create a virtual environment an
     ```bash
     # Windows
     python main.py -i data/input.txt -d "\t"
+    
+    # MacOs/Linux
+    python3 main.py -i data/input.txt -d "\t"
     ```
 
 2. The tool will process the input file line-by-line, calculating the distance between every pair of addresses and
