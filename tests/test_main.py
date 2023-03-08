@@ -1,9 +1,12 @@
 import os
 
-from main import start_processing_loop
+import pytest
+
+from app import start_processing_loop
 
 
-def test_processing_loop():
+@pytest.mark.asyncio
+async def test_processing_loop():
     if os.path.exists("data/test_output.csv"):
         os.remove("data/test_output.csv")
     if os.path.exists("data/test_input.txt"):
@@ -13,7 +16,7 @@ def test_processing_loop():
         f.write('\"Via Livorno 60, Torino (TO)\"' + '\t' + '\"Corso Umberto I, 29, 28838 Stresa VB\"' + '\n')
         f.write("Environment Park Torino" + "\t" + "Hotel Regina Palace Stresa" + "\n")
 
-    start_processing_loop(
+    await start_processing_loop(
         input_file="data/test_input.txt",
         input_delimiter="\t",
         output_file="data/test_output.csv",

@@ -1,9 +1,9 @@
 import argparse
+import asyncio
 import codecs
 import os
-import time
 
-from playwright.sync_api import sync_playwright, Page
+from playwright.async_api import async_playwright, Page
 
 
 # Source: https://stackoverflow.com/a/35038703/8522453
@@ -25,7 +25,7 @@ def setup_output_file(filename: str, delimiter: str):
             f.write(f"origin{delimiter}destination{delimiter}driving_distance_km" + "\n")
 
 
-def write_to_output_file(filename, delimiter, origin, destination, distance):
+def write_to_output_file(filename: str, delimiter: str, origin: str, destination: str, distance: str):
     with open(filename, "a") as o:
         # Replace commas with semicolons to avoid problems with CSV
         origin = origin.replace(",", ";")
@@ -33,22 +33,32 @@ def write_to_output_file(filename, delimiter, origin, destination, distance):
         o.write(f"{origin}{delimiter}{destination}{delimiter}{distance}\n")
 
 
-def get_distance_from_google_maps(origin: str, destination: str, page: Page,
-                                  google_maps_query_timeout: int) -> str:
+async def handle_google_cookies(page, google_maps_query_timeout):
     try:
-        page.wait_for_selector("div#directions-searchbox-0 input")
-        page.fill("div#directions-searchbox-0 input", origin)
+        await page.wait_for_selector("form[action*='consent.google.com'] button",
+                                     timeout=google_maps_query_timeout)
+        await page.click("form[action*='consent.google.com'] button")
+    except:
+        if await page.query_selector("div#directions-searchbox-0 input") is None:
+            raise Exception("Google Maps did not load correctly")
 
-        page.wait_for_selector("div#directions-searchbox-1 input")
-        page.fill("div#directions-searchbox-1 input", destination)
 
-        page.click("img[aria-label='Driving']")
-        page.click("div#directions-searchbox-1 input")
-        page.press("div#directions-searchbox-1 input", "Enter")
+async def get_distance_from_google_maps(page: Page, origin: str, destination: str,
+                                        google_maps_query_timeout: int) -> str:
+    try:
+        await page.wait_for_selector("div#directions-searchbox-0 input")
+        await page.fill("div#directions-searchbox-0 input", origin)
 
-        page.wait_for_selector("div#section-directions-trip-0", timeout=google_maps_query_timeout)
+        await page.wait_for_selector("div#directions-searchbox-1 input")
+        await page.fill("div#directions-searchbox-1 input", destination)
 
-        distance = page.inner_text("div#section-directions-trip-0")
+        await page.click("img[aria-label='Driving']")
+        await page.click("div#directions-searchbox-1 input")
+        await page.press("div#directions-searchbox-1 input", "Enter")
+
+        await page.wait_for_selector("div#section-directions-trip-0", timeout=google_maps_query_timeout)
+
+        distance = await page.inner_text("div#section-directions-trip-0")
         distance = [line for line in distance.splitlines() if "km" in line][0]
         distance = distance.replace(",", "").replace("km", "").strip()
     except:
@@ -57,28 +67,24 @@ def get_distance_from_google_maps(origin: str, destination: str, page: Page,
     return distance
 
 
-def start_processing_loop(input_file="data/input.txt",
-                          input_delimiter="\t",
-                          output_file="data/output.csv",
-                          output_delimiter=",",
-                          google_maps_start_url="https://www.google.com/maps/dir///@41.1905507,3.395374,5z/data=!4m2!4m1!3e0?hl=en",
-                          seconds_to_sleep_between_searches=1,
-                          google_maps_query_timeout=60000,
-                          headless=True):
+async def start_processing_loop(input_file="data/input.txt",
+                                input_delimiter="\t",
+                                output_file="data/output.csv",
+                                output_delimiter=",",
+                                google_maps_start_url="https://www.google.com/maps/dir///@41.1905507,3.395374,5z/data=!4m2!4m1!3e0?hl=en",
+                                seconds_to_sleep_between_searches=1,
+                                google_maps_query_timeout=60000,
+                                slow_mo=250,
+                                headless=True):
     setup_output_file(filename=output_file, delimiter=output_delimiter)
 
     with open(input_file, "r") as f:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=headless, slow_mo=250)
-            page = browser.new_page()
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=headless, slow_mo=slow_mo)
+            page = await browser.new_page()
 
-            page.goto(google_maps_start_url)
-            try:
-                page.wait_for_selector("form[action*='consent.google.com'] button", timeout=google_maps_query_timeout)
-                page.click("form[action*='consent.google.com'] button")
-            except:
-                if page.query_selector("div#directions-searchbox-0 input") is None:
-                    raise Exception("Google Maps did not load correctly")
+            await page.goto(google_maps_start_url)
+            await handle_google_cookies(page=page, google_maps_query_timeout=google_maps_query_timeout)
 
             while True:
                 line = f.readline()
@@ -89,8 +95,8 @@ def start_processing_loop(input_file="data/input.txt",
 
                 print(f"Searching distance from {{{origin}}} to {{{destination}}}...")
 
-                distance = get_distance_from_google_maps(origin=origin, destination=destination, page=page,
-                                                         google_maps_query_timeout=google_maps_query_timeout)
+                distance = await get_distance_from_google_maps(page=page, origin=origin, destination=destination,
+                                                               google_maps_query_timeout=google_maps_query_timeout)
 
                 print(f"Result: {distance} km")
 
@@ -98,10 +104,10 @@ def start_processing_loop(input_file="data/input.txt",
                                      destination=destination, distance=distance)
 
                 # Small pause to not overload google maps
-                time.sleep(seconds_to_sleep_between_searches)
-                page.goto(google_maps_start_url)
+                await asyncio.sleep(seconds_to_sleep_between_searches)
+                await page.goto(google_maps_start_url)
 
-            browser.close()
+            await browser.close()
 
 
 if __name__ == "__main__":
@@ -113,17 +119,19 @@ if __name__ == "__main__":
     parser.add_argument("-od", "--output-delimiter", help="Output filename delimiter", type=str, default=",")
     parser.add_argument("-s", "--seconds-to-sleep-between-searches", help="Seconds to sleep between searches", type=int,
                         default=1)
+    parser.add_argument("-sl", "--slow-mo", help="Playwright slow mo", type=int, default=250)
     parser.add_argument("-t", "--google-maps-query-timeout", help="Google maps query timeout", type=int, default=60000)
     parser.add_argument("-hl", "--headless", help="Headless mode", type=int, default=1)
 
     args = parser.parse_args()
 
-    start_processing_loop(
+    asyncio.run(start_processing_loop(
         input_file=args.input,
         input_delimiter=args.delimiter,
         output_file=args.output,
         output_delimiter=args.output_delimiter,
+        slow_mo=args.slow_mo,
         seconds_to_sleep_between_searches=args.seconds_to_sleep_between_searches,
         google_maps_query_timeout=args.google_maps_query_timeout,
         headless=bool(args.headless)
-    )
+    ))
