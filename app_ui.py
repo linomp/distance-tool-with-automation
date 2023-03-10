@@ -73,7 +73,7 @@ async def main():
 
 
 if __name__ == '__main__':
-    if 'win' in sys.platform:
+    if sys.platform == 'win32':
         # On Windows, the default event loop is SelectorEventLoop, which does not
         # support subprocesses. The ProactorEventLoop should be used instead.
         # Source: https://discuss.streamlit.io/t/using-playwright-with-streamlit/28380/2
