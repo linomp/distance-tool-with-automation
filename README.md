@@ -49,10 +49,7 @@ Run the following commands to clone the project, create a virtual environment an
 
 2. Launch the app:
     ```bash
-    # Windows
-    streamlit run app_ui.py
-    
-    # MacOS/Linux
+    # Windows/MacOS/Linux
     streamlit run app_ui.py
     ```
    Then visit http://localhost:8501/ to use the browser-based UI:
@@ -64,7 +61,7 @@ Run the following commands to clone the project, create a virtual environment an
       <summary>Or invoke the app from command-line (advanced)</summary>
 
       ```bash
-      # Windows
+      # Windows/MacOS/Linux
       python app.py -i data/input.txt -d "\t"
       
       # MacOS/Linux
