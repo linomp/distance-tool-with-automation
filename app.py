@@ -1,42 +1,15 @@
 import argparse
 import asyncio
-import codecs
-import os
 
 from playwright.async_api import async_playwright, Page
 
-
-# Source: https://stackoverflow.com/a/35038703/8522453
-def unescaped_str(arg_str) -> str:
-    return codecs.decode(str(arg_str), 'unicode_escape')
+from utils import setup_output_file, parse_line, write_to_output_file, unescaped_str, send_telegram_notification
 
 
-def parse_line(line: str, delimiter: str) -> (str, str):
-    line = line.replace("\n", "")
-    origin, destination = line.split(delimiter)
-    origin = origin.replace('"', '')
-    destination = destination.replace('"', '')
-    return origin, destination
-
-
-def setup_output_file(filename: str, delimiter: str):
-    if not os.path.exists(filename):
-        with open(filename, "w") as f:
-            f.write(f"origin{delimiter}destination{delimiter}driving_distance_km" + "\n")
-
-
-def write_to_output_file(filename: str, delimiter: str, origin: str, destination: str, distance: str):
-    with open(filename, "a") as o:
-        # Replace commas with semicolons to avoid problems with CSV
-        origin = origin.replace(",", ";")
-        destination = destination.replace(",", ";")
-        o.write(f"{origin}{delimiter}{destination}{delimiter}{distance}\n")
-
-
-async def handle_google_cookies(page, google_maps_query_timeout):
+async def handle_google_cookies(page: Page, timeout: int):
     try:
         await page.wait_for_selector("form[action*='consent.google.com'] button",
-                                     timeout=google_maps_query_timeout)
+                                     timeout=timeout)
         await page.click("form[action*='consent.google.com'] button")
     except:
         if await page.query_selector("div#directions-searchbox-0 input") is None:
@@ -44,7 +17,7 @@ async def handle_google_cookies(page, google_maps_query_timeout):
 
 
 async def get_distance_from_google_maps(page: Page, origin: str, destination: str,
-                                        google_maps_query_timeout: int) -> str:
+                                        timeout: int) -> str:
     try:
         await page.wait_for_selector("div#directions-searchbox-0 input")
         await page.fill("div#directions-searchbox-0 input", origin)
@@ -56,7 +29,7 @@ async def get_distance_from_google_maps(page: Page, origin: str, destination: st
         await page.click("div#directions-searchbox-1 input")
         await page.press("div#directions-searchbox-1 input", "Enter")
 
-        await page.wait_for_selector("div#section-directions-trip-0", timeout=google_maps_query_timeout)
+        await page.wait_for_selector("div#section-directions-trip-0", timeout=timeout)
 
         distance = await page.inner_text("div#section-directions-trip-0")
         distance = [line for line in distance.splitlines() if "km" in line][0]
@@ -70,11 +43,11 @@ async def get_distance_from_google_maps(page: Page, origin: str, destination: st
 async def start_processing_loop(input_file="data/input.txt",
                                 input_delimiter="\t",
                                 output_file="data/output.csv",
-                                output_delimiter=",",
+                                output_delimiter="\t",
                                 google_maps_start_url="https://www.google.com/maps/dir///@41.1905507,3.395374,5z/data=!4m2!4m1!3e0?hl=en",
                                 seconds_to_sleep_between_searches=1,
                                 google_maps_query_timeout=60000,
-                                slow_mo=250,
+                                slow_mo=10,
                                 headless=True):
     setup_output_file(filename=output_file, delimiter=output_delimiter)
 
@@ -83,8 +56,8 @@ async def start_processing_loop(input_file="data/input.txt",
             browser = await p.chromium.launch(headless=headless, slow_mo=slow_mo)
             page = await browser.new_page()
 
-            await page.goto(google_maps_start_url)
-            await handle_google_cookies(page=page, google_maps_query_timeout=google_maps_query_timeout)
+            await page.goto(google_maps_start_url, timeout=google_maps_query_timeout)
+            await handle_google_cookies(page=page, timeout=google_maps_query_timeout)
 
             while True:
                 line = f.readline()
@@ -96,7 +69,7 @@ async def start_processing_loop(input_file="data/input.txt",
                 print(f"Searching distance from {{{origin}}} to {{{destination}}}...")
 
                 distance = await get_distance_from_google_maps(page=page, origin=origin, destination=destination,
-                                                               google_maps_query_timeout=google_maps_query_timeout)
+                                                               timeout=google_maps_query_timeout)
 
                 print(f"Result: {distance} km")
 
@@ -105,9 +78,11 @@ async def start_processing_loop(input_file="data/input.txt",
 
                 # Small pause to not overload google maps
                 await asyncio.sleep(seconds_to_sleep_between_searches)
-                await page.goto(google_maps_start_url)
+                await page.goto(google_maps_start_url, timeout=google_maps_query_timeout)
 
             await browser.close()
+
+    send_telegram_notification(input_file)
 
 
 if __name__ == "__main__":
@@ -116,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input", help="Input filename", type=str, default="data/input.txt")
     parser.add_argument("-d", "--delimiter", help="Input filename delimiter", type=unescaped_str, default="\t")
     parser.add_argument("-o", "--output", help="Output filename", type=str, default="data/output.csv")
-    parser.add_argument("-od", "--output-delimiter", help="Output filename delimiter", type=str, default=",")
+    parser.add_argument("-od", "--output-delimiter", help="Output filename delimiter", type=str, default="\t")
     parser.add_argument("-s", "--seconds-to-sleep-between-searches", help="Seconds to sleep between searches", type=int,
                         default=1)
     parser.add_argument("-sl", "--slow-mo", help="Playwright slow mo", type=int, default=250)

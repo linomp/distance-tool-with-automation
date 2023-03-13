@@ -7,3 +7,4 @@ dist
 output.*
 *_cache
 test_input.txt
+.env

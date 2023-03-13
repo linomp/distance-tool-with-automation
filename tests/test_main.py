@@ -20,15 +20,15 @@ async def test_processing_loop():
         input_file="data/test_input.txt",
         input_delimiter="\t",
         output_file="data/test_output.csv",
-        output_delimiter=","
+        output_delimiter="\t"
     )
     with open("data/test_output.csv", "r") as f:
         lines = f.readlines()
         assert len(lines) >= 2
         for line in lines:
-            assert len(line.split(",")) == 3
+            assert len(line.split("\t")) == 3
             assert "ERROR" not in line
-            last_element = line.split(",")[-1].strip()
+            last_element = line.split("\t")[-1].strip()
             if last_element != "driving_distance_km":
                 assert last_element.isdigit()
 
