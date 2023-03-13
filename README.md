@@ -74,6 +74,27 @@ Run the following commands to clone the project, create a virtual environment an
 
    ![output](https://user-images.githubusercontent.com/40581019/223180449-9546dba8-ce92-4505-a840-382b33e82a0c.png)
 
+## Notifications (Optional)
+
+The app has an optional notification feature (via telegram bot).
+
+<details>
+      <summary>Steps to enable it</summary>
+
+1. Search for `@BotFather` in Telegram and follow the instructions to create a new bot.
+2. Send a message to your bot and get your chat id by visiting this URL:
+   `https://api.telegram.org/bot<your bot token>/getUpdates`
+3. Create an .env file in the root directory of the project and add the following variables:
+    ```bash
+    TELEGRAM_TOKEN=<your bot token from step 1>
+    TELEGRAM_CHAT_ID=<your chat id from step 2>
+    ```
+4. Check that it works. Run `pytest .` and you should see a message in the bot chat saying
+   this : `Finished processing: test_input.txt`
+
+Learn more [here](https://medium.com/codex/using-python-to-send-telegram-messages-in-3-simple-steps-419a8b5e5e2)
+</details>
+
 ## Alternative
 
 This [other version](https://github.com/linomp/distance-tool) gets the distances using the Google Maps Distance Matrix

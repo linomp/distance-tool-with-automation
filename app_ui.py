@@ -43,13 +43,13 @@ async def main():
 
     with st.sidebar:
         input_filename = st.selectbox('Select input file', input_files)
-        input_delimiter = st.selectbox('Input delimiter', options=['\t', ',', ';'], format_func=ff)
+        input_delimiter = st.selectbox('Input delimiter', options=['\t', ',', ';'], format_func=ff, index=0)
         output_filename = st.text_input('Output filename', value='output.csv')
-        output_delimiter = st.selectbox('Output delimiter', options=['\t', ',', ';'], format_func=ff, index=1)
+        output_delimiter = st.selectbox('Output delimiter', options=['\t', ',', ';'], format_func=ff, index=0)
 
         with st.expander('Advanced options'):
             seconds_to_sleep_between_searches = st.number_input('Seconds to sleep between searches', value=1)
-            slow_mo = st.number_input('Playwright slow mo', value=250)
+            slow_mo = st.number_input('Playwright slow mo', value=10)
             google_maps_query_timeout = st.number_input('Google maps query timeout', value=60000)
             headless = st.checkbox('Headless mode', value=True)
 
