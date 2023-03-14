@@ -3,7 +3,13 @@ import asyncio
 
 from playwright.async_api import async_playwright, Page
 
-from utils import setup_output_file, parse_line, write_to_output_file, unescaped_str, send_telegram_notification
+from utils import setup_output_file, parse_line, write_to_output_file, unescaped_str, \
+    send_processing_finished_notification, \
+    send_error_notification
+
+
+async def go_to_base_url(page: Page, google_maps_start_url: str, timeout: int):
+    await page.goto(google_maps_start_url, timeout=timeout, wait_until="domcontentloaded")
 
 
 async def handle_google_cookies(page: Page, timeout: int):
@@ -56,33 +62,39 @@ async def start_processing_loop(input_file="data/input.txt",
             browser = await p.chromium.launch(headless=headless, slow_mo=slow_mo)
             page = await browser.new_page()
 
-            await page.goto(google_maps_start_url, timeout=google_maps_query_timeout)
+            await go_to_base_url(page=page, google_maps_start_url=google_maps_start_url,
+                                 timeout=google_maps_query_timeout)
             await handle_google_cookies(page=page, timeout=google_maps_query_timeout)
 
             while True:
                 line = f.readline()
                 if not line:
                     break
+                try:
+                    origin, destination = parse_line(line=line, delimiter=input_delimiter)
 
-                origin, destination = parse_line(line=line, delimiter=input_delimiter)
+                    print(f"Searching distance from {{{origin}}} to {{{destination}}}...")
 
-                print(f"Searching distance from {{{origin}}} to {{{destination}}}...")
+                    distance = await get_distance_from_google_maps(page=page, origin=origin, destination=destination,
+                                                                   timeout=google_maps_query_timeout)
 
-                distance = await get_distance_from_google_maps(page=page, origin=origin, destination=destination,
-                                                               timeout=google_maps_query_timeout)
+                    print(f"Result: {distance} km")
 
-                print(f"Result: {distance} km")
+                    write_to_output_file(filename=output_file, delimiter=output_delimiter, origin=origin,
+                                         destination=destination, distance=distance)
 
-                write_to_output_file(filename=output_file, delimiter=output_delimiter, origin=origin,
-                                     destination=destination, distance=distance)
-
-                # Small pause to not overload google maps
-                await asyncio.sleep(seconds_to_sleep_between_searches)
-                await page.goto(google_maps_start_url, timeout=google_maps_query_timeout)
+                    # Small pause to not overload google maps
+                    await asyncio.sleep(seconds_to_sleep_between_searches)
+                    await go_to_base_url(page=page, google_maps_start_url=google_maps_start_url,
+                                         timeout=google_maps_query_timeout)
+                except Exception as e:
+                    print(e)
+                    send_error_notification(input_file, str(e))
+                    continue
 
             await browser.close()
 
-    send_telegram_notification(input_file)
+    send_processing_finished_notification(input_file)
 
 
 if __name__ == "__main__":

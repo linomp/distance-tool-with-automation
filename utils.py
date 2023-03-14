@@ -41,14 +41,22 @@ def write_to_error_file(filename: str, delimiter: str, origin: str, destination:
         o.write(f"{origin}{delimiter}{destination}\n")
 
 
-def send_telegram_notification(filename: str):
+def send_processing_finished_notification(filename: str):
+    message = f"Finished processing: {filename.split('/')[-1]}"
+    send_telegram_message(message)
+
+
+def send_error_notification(filename: str, error: str):
+    message = f"Error while processing {filename.split('/')[-1]}: {error}"
+    send_telegram_message(message)
+
+
+def send_telegram_message(message: str):
     token = os.getenv("TELEGRAM_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
     if token is None or chat_id is None:
         return
-
-    message = f"Finished processing: {filename.split('/')[-1]}"
 
     url = f"https://api.telegram.org/bot{token}/sendMessage?chat_id={chat_id}&text={message}"
 
