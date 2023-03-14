@@ -44,7 +44,7 @@ async def main():
     with st.sidebar:
         input_filename = st.selectbox('Select input file', input_files)
         input_delimiter = st.selectbox('Input delimiter', options=['\t', ',', ';'], format_func=ff, index=0)
-        output_filename = st.text_input('Output filename', value='output.csv')
+        output_filename = st.text_input('Output filename', value=input_filename.split('.')[0] + '_with_distances.csv')
         output_delimiter = st.selectbox('Output delimiter', options=['\t', ',', ';'], format_func=ff, index=0)
 
         with st.expander('Advanced options'):

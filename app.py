@@ -51,7 +51,7 @@ async def start_processing_loop(input_file="data/input.txt",
                                 headless=True):
     setup_output_file(filename=output_file, delimiter=output_delimiter)
 
-    with open(input_file, "r") as f:
+    with open(input_file, "r", encoding="cp1252") as f:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=headless, slow_mo=slow_mo)
             page = await browser.new_page()
