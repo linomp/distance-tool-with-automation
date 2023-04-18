@@ -8,3 +8,4 @@ output.*
 *_cache
 test_input.txt
 .env
+__pycache__
