@@ -94,12 +94,3 @@ The app has an optional notification feature (via telegram bot).
 
 Learn more [here](https://medium.com/codex/using-python-to-send-telegram-messages-in-3-simple-steps-419a8b5e5e2)
 </details>
-
-## Alternative
-
-This [other version](https://github.com/linomp/distance-tool) gets the distances using the Google Maps Distance Matrix
-API.
-
-It offers a web-based UI and allows you to upload an excel file. However, it requires a Google Maps API key. The service
-is free up to [~40K requests per month](https://mapsplatform.google.com/pricing/) but after that Google will start
-charging you.
